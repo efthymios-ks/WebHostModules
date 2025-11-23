@@ -42,7 +42,7 @@ var app = await builder
     
     // Configure services
     .ConfigureServices(services => services.AddAuthentication())
-    .ConfigureServices((services, config) => services.Configure<EmailSettings>(config.GetSection("Email")))
+    .ConfigureServices((services, configuration) => services.Configure<EmailSettings>(configuration.GetSection("Email")))
     
     // Configure pipeline
     .ConfigurePipeline(app => app.UseAuthentication())
@@ -51,9 +51,9 @@ var app = await builder
     // Conditional operations
     .WhenEnvironment("Development")
         .ConfigureServices(services => services.AddSwaggerGen())
-        .ConfigurePipeline(app => app.UseSwagger())
+    .ConfigurePipeline(app => app.UseSwagger())
     
-    .When(config => config.GetValue<bool>("Features:EnableCaching"))
+    .When(configuration => configuration.GetValue<bool>("Features:EnableCaching"))
         .AddModule(new CachingModule())
     
     .When(() => DateTime.Now.Hour > 9)
@@ -73,9 +73,10 @@ builder.ToPipeline()
 
 ### Configuration Methods
 ```csharp
+.ConfigureBuilder(Action<WebApplicationBuilder> configuration)
 .ConfigureServices(Action<IServiceCollection> configuration)
 .ConfigureServices(Action<IServiceCollection, IConfiguration> configuration)
-.ConfigureBuilder(Action<WebApplicationBuilder> configuration)
+.ConfigureServices(Action<IServiceCollection, IConfiguration, IWebHostEnvironment> configuration)
 .ConfigurePipeline(Action<WebApplication> configuration)
 .ConfigurePipeline(Func<WebApplication, Task> configuration)
 ```
@@ -127,6 +128,7 @@ var app = await builder
     .ConfigureServices(services => services.AddAuthentication())
     .WhenEnvironment("Development")
         .ConfigureServices(services => services.AddSwaggerGen())
+    .WhenEnvironment("Development")
         .ConfigurePipeline(app => app.UseSwagger())
     .ConfigurePipeline(app => app.UseAuthentication())
     .BuildAsync();
